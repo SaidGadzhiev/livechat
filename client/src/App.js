@@ -1,19 +1,24 @@
+import { useEffect } from 'react';
+
 function App() {
+	const getData = async () => {
+		try {
+			const result = await fetch('/bacon');
+			console.log(result);
+			const parsedResult = await result.json();
+			console.log(parsedResult);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	useEffect(() => {
+		getData();
+	}, []);
+
 	return (
 		<div className='App'>
-			<header className='App-header'>
-				<p>
-					Edit <code>src/App.js</code> and save to reload.
-				</p>
-				<a
-					className='App-link'
-					href='https://reactjs.org'
-					target='_blank'
-					rel='noopener noreferrer'
-				>
-					Learn React
-				</a>
-			</header>
+			<p>Hello </p>
 		</div>
 	);
 }
