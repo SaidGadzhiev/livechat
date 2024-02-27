@@ -4,9 +4,8 @@ function App() {
 	const getData = async () => {
 		try {
 			const result = await fetch('/bacon');
-			console.log(result);
 			const parsedResult = await result.json();
-			console.log(parsedResult);
+			console.log(parsedResult.data);
 		} catch (err) {
 			console.log(err);
 		}

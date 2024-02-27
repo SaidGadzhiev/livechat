@@ -7,3 +7,5 @@ const fetchRequest = async (api) => {
 		return error;
 	}
 };
+
+export default fetchRequest;
