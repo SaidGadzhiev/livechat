@@ -1,6 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
-const createUser = require('./endpoints/createUser');
+const createUser = require('./endpoints/users/createUser');
 
 const app = express();
 const port = 4000;
