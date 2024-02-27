@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const createUser = require('./endpoints/createUser');
 
 const app = express();
 const port = 4000;
@@ -19,6 +20,9 @@ app.use(function (req, res, next) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan('tiny'));
+
+//users
+app.post('/users', createUser);
 
 app.get('/bacon', (req, res) => {
 	console.log('found');
