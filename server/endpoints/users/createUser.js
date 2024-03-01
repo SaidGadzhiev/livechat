@@ -49,22 +49,97 @@ const createUser = async (req, res) => {
 		});
 	}
 
-	console.log(errors);
+	//validating password
+	if (!validator.isStrongPassword(password)) {
+		// errors.push({
+		// 	passwordError:
+		// 		'Make sure your password is at least 8 characters long. Contains at least one lowercase letter. Contains at least one uppercase letter. Contains at least one digit. Contains at least one special character',
+		// });
 
-	try {
-		await client.connect();
-		const db = await client.db('livechat');
+		let passwordErrors;
 
-		// const result = await db
-		// 	.collection('users')
-		// 	.insertOne({ _id: new ObjectId(), data });
-		// if (result) {
-		// 	res.status(200).json({ status: 200, data: result });
-		// }
-	} catch (err) {
-		res.status(500).json({ status: 500, message: err.message });
-	} finally {
-		client.close();
+		switch (true) {
+			case password.length < 8:
+				passwordErrors =
+					'Make sure your password is at least 8 characters long';
+
+				break;
+
+			case !/[a-z]/.test(password):
+				passwordErrors =
+					'Password should contain at least one lowercase letter';
+
+				break;
+
+			case !/[A-Z]/.test(password):
+				passwordErrors =
+					'Password should contain at least one uppercase letter';
+
+				break;
+
+			case !/\d/.test(password):
+				passwordErrors = 'Password should contain at least one digit.';
+
+				break;
+
+			case !/[!@#$%^&*(),.?":{}|<>]/.test(password):
+				passwordErrors =
+					'Password should contain at least one special character.';
+
+				break;
+
+			default:
+				break;
+		}
+
+		errors.push({
+			passwordError: passwordErrors,
+		});
+	}
+
+	//hashing password
+
+	if (errors.length > 0) {
+		return res.status(400).json({ errors });
+	} else {
+		async function hashPassword(password) {
+			const saltRounds = 10;
+			const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+			return hashedPassword;
+		}
+
+		hashPassword(password).then((hashedPassword) => {
+			console.log(hashedPassword);
+			newUser.password = hashedPassword;
+			console.log(newUser);
+		});
+
+		try {
+			await client.connect();
+			const db = await client.db('livechat');
+
+			const existingUser = await db.collection('users').findOne({
+				$or: [{ fName: newUser.fName }, { email: newUser.email }],
+			});
+			console.log(existingUser);
+
+			if (existingUser) {
+				res
+					.status(409)
+					.json({ status: 409, message: 'user or email already taken' });
+			} else {
+				const result = await db
+					.collection('users')
+					.insertOne({ _id: new ObjectId(), ...newUser });
+
+				res.status(200).json({ status: 200, data: result });
+			}
+		} catch (err) {
+			res.status(500).json({ status: 500, message: err.message });
+		} finally {
+			client.close();
+		}
 	}
 };
 
